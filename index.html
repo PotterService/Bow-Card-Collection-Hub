@@ -7,6 +7,110 @@
 <meta name="description" content="Bow Card Collection Hub for Pokémon, Magic, Disney Lorcana, One Piece, and Yu-Gi-Oh!">
 <title>Bow Card Collection Hub</title>
 <link rel="stylesheet" href="assets/styles.css">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQSW0TEBE"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQSW0TEBE', {
+  site_name: 'Bow Card Collection Hub',
+  page_title: document.title,
+  page_location: window.location.href,
+  page_path: window.location.pathname
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  const clean = value => (value || '').replace(/\s+/g, ' ').trim().slice(0, 180);
+
+  function send(name, extra) {
+    if (typeof gtag !== 'function') return;
+    gtag('event', name, Object.assign({
+      site_name: 'Bow Card Collection Hub',
+      page_name: document.title,
+      page_path: window.location.pathname,
+      page_url: window.location.href,
+      referrer: document.referrer || 'direct'
+    }, extra || {}));
+  }
+
+  document.addEventListener('click', function (event) {
+    const target = event.target.closest('a, button');
+    if (!target) return;
+
+    const text = clean(target.innerText || target.getAttribute('aria-label') || target.id);
+    const href = target.tagName === 'A' ? (target.getAttribute('href') || '') : '';
+
+    let eventName = target.tagName === 'A' ? 'link_click' : 'button_click';
+    if (href) {
+      try {
+        const destination = new URL(href, window.location.href);
+        if (destination.hostname !== window.location.hostname) {
+          eventName = 'outbound_link_click';
+        }
+      } catch (_) {}
+    }
+
+    send(eventName, {
+      click_text: text,
+      click_url: href,
+      element_id: target.id || '',
+      element_classes: clean(target.className || '')
+    });
+
+    if (/open pokémon collection|open pokemon collection/i.test(text)) {
+      send('collection_site_opened', { collection_name: 'Pokemon', destination_url: href });
+    }
+    if (/open magic collection/i.test(text)) {
+      send('collection_site_opened', { collection_name: 'Magic: The Gathering', destination_url: href });
+    }
+    if (/open lorcana collection/i.test(text)) {
+      send('collection_site_opened', { collection_name: 'Disney Lorcana', destination_url: href });
+    }
+    if (/open one piece collection/i.test(text)) {
+      send('collection_site_opened', { collection_name: 'One Piece', destination_url: href });
+    }
+    if (/open yu-gi-oh! collection/i.test(text)) {
+      send('collection_site_opened', { collection_name: 'Yu-Gi-Oh!', destination_url: href });
+    }
+    if (/choose a collection/i.test(text)) {
+      send('choose_collection_clicked');
+    }
+    if (/how it works/i.test(text)) {
+      send('how_it_works_clicked');
+    }
+    if (/future plans/i.test(text)) {
+      send('future_plans_clicked');
+    }
+  }, true);
+
+  document.querySelectorAll('details').forEach(function (item) {
+    item.addEventListener('toggle', function () {
+      if (!item.open) return;
+      const summary = item.querySelector('summary');
+      send('faq_opened', {
+        faq_question: clean(summary ? summary.textContent : '')
+      });
+    });
+  });
+
+  [25, 50, 75, 100].forEach(function (percent) {
+    let sent = false;
+    window.addEventListener('scroll', function () {
+      if (sent) return;
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable <= 0) return;
+      const depth = Math.round((window.scrollY / scrollable) * 100);
+      if (depth >= percent) {
+        sent = true;
+        send('scroll_depth', { percent_scrolled: percent });
+      }
+    }, { passive: true });
+  });
+});
+</script>
+
 </head>
 <body>
 <header>
